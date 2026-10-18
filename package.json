@@ -1,0 +1,35 @@
+{
+  "name": "isocal-backend",
+  "version": "1.0.0",
+  "description": "ISOCAL backend foundation with Express, PostgreSQL, TypeORM, JWT and WebSocket support.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "build": "node -e \"console.log('Backend build is not required for this ES module project.');\"",
+    "lint": "eslint . --ext .js",
+    "test": "vitest run --passWithNoTests",
+    "migration:run": "node ./node_modules/typeorm/cli.js migration:run -d ./src/database/dataSource.js",
+    "migration:revert": "node ./node_modules/typeorm/cli.js migration:revert -d ./src/database/dataSource.js",
+    "migration:generate": "node ./node_modules/typeorm/cli.js migration:generate -d ./src/database/dataSource.js src/database/migrations/AutoMigration"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.18.0",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.20",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.0.0",
+    "supertest": "^7.0.0",
+    "vitest": "^2.1.8"
+  }
+}
