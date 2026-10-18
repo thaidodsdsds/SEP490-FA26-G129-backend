@@ -1,4 +1,6 @@
-export const requestLogger = (req, res, next) => {
+import type { RequestHandler } from 'express';
+
+export const requestLogger: RequestHandler = (req, res, next) => {
   const startedAt = Date.now();
 
   res.on('finish', () => {

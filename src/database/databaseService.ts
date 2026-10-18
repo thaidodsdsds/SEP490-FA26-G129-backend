@@ -15,7 +15,7 @@ export const initializeDatabase = async () => {
 
     return dataSource;
   } catch (error) {
-    const message = error?.message || 'Database connection failed.';
+    const message = error instanceof Error ? error.message : 'Database connection failed.';
     throw new AppError(
       `Database connection failed: ${message}. Check PostgreSQL credentials, host, and that the database is running and reachable.`,
       500,

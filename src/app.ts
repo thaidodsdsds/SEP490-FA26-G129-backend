@@ -9,7 +9,6 @@ import { authenticate } from './middlewares/auth.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { AppError } from './common/errors.js';
-import customerRoutes from './modules/customers/customer.routes.js';
 
 const app = express();
 
@@ -41,8 +40,6 @@ app.get(`${API_PREFIX}/secure-check`, authenticate, (req, res) => {
     }),
   );
 });
-
-app.use(`${API_PREFIX}/customers`, customerRoutes);
 
 app.use((req, res, next) => {
   next(new AppError(`Unhandled route: ${req.method} ${req.originalUrl}`, 404, 'NOT_FOUND', { path: req.originalUrl }));

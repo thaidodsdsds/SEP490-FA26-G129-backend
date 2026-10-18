@@ -26,7 +26,7 @@ const startServer = async () => {
     console.error('Failed to start backend server.');
     console.error(error);
 
-    if (error.cause) {
+    if (error instanceof Error && error.cause) {
       console.error('Underlying database/driver error:', error.cause);
     }
 
@@ -34,7 +34,7 @@ const startServer = async () => {
   }
 };
 
-const gracefulShutdown = async (signal) => {
+const gracefulShutdown = async (signal: NodeJS.Signals) => {
   if (shutdownInitiated) {
     return;
   }

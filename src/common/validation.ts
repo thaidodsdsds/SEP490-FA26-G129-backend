@@ -1,4 +1,7 @@
-export const validateRequiredFields = (payload, requiredFields = []) => {
+export const validateRequiredFields = (
+  payload: Record<string, unknown> | null | undefined,
+  requiredFields: string[] = [],
+) => {
   const missingFields = requiredFields.filter((field) => {
     const value = payload?.[field];
     return value === undefined || value === null || value === '';

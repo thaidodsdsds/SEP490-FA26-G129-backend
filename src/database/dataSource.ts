@@ -1,13 +1,8 @@
 import 'reflect-metadata';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { DataSource } from 'typeorm';
 import env from '../config/env.js';
-import Customer from '../modules/customers/customer.entity.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const customerMigrationPath = path.join(__dirname, 'migrations', '1760245200000-CreateCustomersTable.js');
+import { entities } from './entities.js';
+import AlignIsocalSchema from './migrations/1792400000000-AlignIsocalSchemaV14.js';
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -19,8 +14,8 @@ const dataSource = new DataSource({
   ssl: env.db.ssl ? { rejectUnauthorized: false } : false,
   synchronize: false,
   logging: env.nodeEnv === 'development',
-  entities: [Customer],
-  migrations: [customerMigrationPath],
+  entities,
+  migrations: [AlignIsocalSchema],
   migrationsTableName: 'migrations',
   subscribers: [],
 });

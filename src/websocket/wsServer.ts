@@ -1,7 +1,8 @@
 import { WebSocketServer } from 'ws';
+import type { Server } from 'node:http';
 import env from '../config/env.js';
 
-export const createWebSocketServer = (httpServer) => {
+export const createWebSocketServer = (httpServer: Server) => {
   const wss = new WebSocketServer({
     server: httpServer,
     path: env.wsPath,
@@ -23,7 +24,8 @@ export const createWebSocketServer = (httpServer) => {
           },
         }));
       } catch (error) {
-        console.error('[ws] Invalid JSON received:', error.message);
+        const messageText = error instanceof Error ? error.message : String(error);
+        console.error('[ws] Invalid JSON received:', messageText);
         socket.send(JSON.stringify({
           type: 'error',
           payload: { message: 'Invalid JSON payload.' },

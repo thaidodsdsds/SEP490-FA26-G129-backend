@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const toBoolean = (value, fallback = false) => {
+const toBoolean = (value: string | undefined, fallback = false): boolean => {
   if (value === undefined || value === null || value === '') {
     return fallback;
   }
@@ -27,6 +27,6 @@ const env = {
     expiresIn: process.env.JWT_EXPIRES_IN || '15m',
   },
   wsPath: process.env.WS_PATH || '/ws',
-};
+} as const;
 
 export default env;
