@@ -23,3 +23,15 @@ roles and eight calibration fields. Back up an existing database before running
 them: upgrading the previous schema removes obsolete account/session and customer
 contact columns, and fills missing customer address/industry values with empty
 address and `Other` industry.
+
+## Roles API
+
+After starting the backend and applying the migrations, list the available roles
+with:
+
+```http
+GET /api/v1/roles
+```
+
+The endpoint returns each role's `id`, `code`, and `name`, sorted by code. It
+does not require authentication.
