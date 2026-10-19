@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import env from '../config/env.js';
 import { entities } from './entities.js';
 import AlignIsocalSchema from './migrations/1792400000000-AlignIsocalSchemaV14.js';
+import AddQuotationContractLink from './migrations/1792410000000-AddQuotationContractLink.js';
 
 const dataSource = new DataSource({
   type: 'postgres',
@@ -15,7 +16,7 @@ const dataSource = new DataSource({
   synchronize: false,
   logging: env.nodeEnv === 'development',
   entities,
-  migrations: [AlignIsocalSchema],
+  migrations: [AlignIsocalSchema, AddQuotationContractLink],
   migrationsTableName: 'migrations',
   subscribers: [],
 });

@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import type { QueryRunner } from 'typeorm';
 import { entities } from '../database/entities.js';
 import AlignIsocalSchema from '../database/migrations/1792400000000-AlignIsocalSchemaV14.js';
+import AddQuotationContractLink from '../database/migrations/1792410000000-AddQuotationContractLink.js';
 import configuredDataSource from '../database/dataSource.js';
 
 class TestDataSource extends DataSource {
@@ -66,6 +67,7 @@ describe('ISOCAL TypeORM entities', () => {
       },
     } as QueryRunner;
     await new AlignIsocalSchema().up(queryRunner);
+    await new AddQuotationContractLink().up(queryRunner);
   });
 
   afterAll(async () => {
@@ -89,10 +91,10 @@ describe('ISOCAL TypeORM entities', () => {
     expect(tableNames).not.toContain('login_sessions');
   });
 
-  it('registers only the consolidated ISOCAL schema migration', () => {
+  it('registers the consolidated schema and quotation-contract migrations in order', () => {
     const migrations = configuredDataSource.options.migrations ?? [];
 
-    expect(migrations).toEqual([AlignIsocalSchema]);
+    expect(migrations).toEqual([AlignIsocalSchema, AddQuotationContractLink]);
   });
 
   it('maps account, customer, device and technical-catalog fields to the revised document', () => {
@@ -101,6 +103,8 @@ describe('ISOCAL TypeORM entities', () => {
     const staffColumns = dataSource.getMetadata('Staff').columns.map(({ databaseName }) => databaseName);
     const deviceColumns = dataSource.getMetadata('Device').columns.map(({ databaseName }) => databaseName);
     const procedureColumns = dataSource.getMetadata('CalibrationProcedure').columns.map(({ databaseName }) => databaseName);
+    const contractColumns = dataSource.getMetadata('Contract').columns.map(({ databaseName }) => databaseName);
+    const quotationColumns = dataSource.getMetadata('Quotation').columns.map(({ databaseName }) => databaseName);
 
     expect(customerColumns).toContain('company_name');
     expect(customerColumns).toContain('industry');
@@ -122,6 +126,8 @@ describe('ISOCAL TypeORM entities', () => {
       'template_engine_version',
       'approved_by',
     ]));
+    expect(contractColumns).toContain('quotation_id');
+    expect(quotationColumns).toEqual(expect.arrayContaining(['approved_by_account_id', 'approved_at']));
     expect(dataSource.getMetadata('CalibrationProcedure').uniques).toEqual(
       expect.arrayContaining([expect.objectContaining({ name: 'UQ_calibration_procedures_code_version' })]),
     );
@@ -136,6 +142,8 @@ describe('ISOCAL TypeORM entities', () => {
       .toEqual(expect.arrayContaining(['device', 'certificate', 'smartContractEvents', 'verificationLogs']));
     expect(dataSource.getMetadata('Department').relations.map(({ propertyName }) => propertyName))
       .toEqual(expect.arrayContaining(['manager', 'parentDepartment', 'staff']));
+    expect(dataSource.getMetadata('Contract').relations.map(({ propertyName }) => propertyName))
+      .toContain('quotation');
   });
 
   it('does not model the documented polymorphic references as incorrect foreign keys', () => {
@@ -173,8 +181,20 @@ describe('ISOCAL TypeORM entities', () => {
       const migratedColumns = definitions.get(metadata.tableName);
       expect(migratedColumns, `${metadata.tableName} is created by a migration`).toBeDefined();
 
+      const allMigratedColumns = new Set(migratedColumns);
+      for (const sql of migrationSql) {
+        const escapedTableName = metadata.tableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const alterTable = new RegExp(
+          `ALTER TABLE\\s+${escapedTableName}\\s+ADD COLUMN IF NOT EXISTS\\s+([a-z_][a-z0-9_]*)`,
+          'gi',
+        );
+        for (const match of sql.matchAll(alterTable)) {
+          allMigratedColumns.add(match[1].toLowerCase());
+        }
+      }
+
       for (const column of metadata.columns) {
-        expect(migratedColumns, `${metadata.tableName}.${column.databaseName}`).toContain(column.databaseName);
+        expect(allMigratedColumns, `${metadata.tableName}.${column.databaseName}`).toContain(column.databaseName);
       }
     }
   });
@@ -188,5 +208,7 @@ describe('ISOCAL TypeORM entities', () => {
 
     expect(metadataChecks.every((name) => constraintNames.has(name))).toBe(true);
     expect(migration).not.toMatch(/CREATE TABLE IF NOT EXISTS\s+repair_orders/i);
+    expect(migration).toMatch(/ALTER TABLE contracts\s+ADD COLUMN IF NOT EXISTS quotation_id INTEGER/i);
+    expect(migration).toMatch(/FOREIGN KEY \(quotation_id\)\s+REFERENCES quotations\(id\)/i);
   });
 });

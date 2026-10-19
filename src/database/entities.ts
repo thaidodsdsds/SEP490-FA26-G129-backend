@@ -565,6 +565,19 @@ export class Quotation {
   @OneToMany(() => Invoice, (invoice) => invoice.quotation)
   invoices!: Invoice[];
 
+  @OneToMany(() => Contract, (contract) => contract.quotation)
+  contracts!: Contract[];
+
+  @Column({ name: 'approved_by_account_id', type: 'int', nullable: true })
+  approvedByAccountId!: number | null;
+
+  @Column({ name: 'approved_at', type: 'timestamp', nullable: true })
+  approvedAt!: Date | null;
+
+  @ManyToOne(() => Account, { nullable: true })
+  @JoinColumn({ name: 'approved_by_account_id', referencedColumnName: 'id' })
+  approvedByAccount!: Account | null;
+
 }
 
 @Entity('quotation_line_items')
@@ -1059,6 +1072,9 @@ export class Contract {
   @Column({ "name": "customer_id", "type": "int", "nullable": false })
   customerId!: number;
 
+  @Column({ name: 'quotation_id', type: 'int', nullable: true })
+  quotationId!: number | null;
+
   @Column({ "name": "title", "type": "varchar", "length": 255, "nullable": false })
   title!: string;
 
@@ -1086,6 +1102,10 @@ export class Contract {
   @ManyToOne(() => Customer, (customer) => customer.contracts, { "nullable": false })
   @JoinColumn({ "name": "customer_id", "referencedColumnName": "id" })
   customer!: Customer;
+
+  @ManyToOne(() => Quotation, (quotation) => quotation.contracts, { nullable: true })
+  @JoinColumn({ name: 'quotation_id', referencedColumnName: 'id' })
+  quotation!: Quotation | null;
 
   @ManyToOne(() => Staff, (staff) => staff.approvedContracts, { "nullable": true })
   @JoinColumn({ "name": "approved_by", "referencedColumnName": "id" })
